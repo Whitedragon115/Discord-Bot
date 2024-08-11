@@ -11,6 +11,9 @@ const client = new Client({
 	intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS],
 });
 
+const dashurl = process.env.DASH_URL;
+const uri = process.env.DB_URI;
+
 const { MongoClient, ObjectId } = require("mongodb");
 const mdbclient = new MongoClient(uri);
 const mdb = mdbclient.db("DiscordBot");
@@ -21,9 +24,6 @@ const mdb = mdbclient.db("DiscordBot");
 
 const fetch = require("node-fetch");
 const cron = require("node-cron");
-
-const dashurl = process.env.DASH_URL;
-const uri = process.env.DB_URI;
 
 const adminUserId = ["490731820552290324", "292596328226095104"];
 answers = {};
