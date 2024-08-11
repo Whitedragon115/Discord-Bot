@@ -325,12 +325,12 @@ async function getSignFromDB(userId) {
 	return Boolean(check);
 }
 
-const clearSignsFromDB = async function () {
+async function clearSignsFromDB() {
 	await dclog("DB", `Clearing all signs...`);
 	const collection = mdb.collection("sign");
 	await collection.deleteMany({});
 	return true;
-};
+}
 
 cron.schedule("0 0 * * *", async () => {
 	console.log("Clearing signs...");
@@ -494,19 +494,21 @@ client.on("messageCreate", async (message) => {
 			message.author.id,
 			Math.floor(messageLength)
 		);
-		if (!isLevelUp) return;
-		return message.react("<:icon_discord_chat:1162324964943343638>");
+		if (isLevelUp) message.react("<:icon_discord_chat:1162324964943343638>");
 	}
 
 	// reply question
 	if (message.channelId == process.env.QUESTION_CHANNEL) {
-		if (!message.reference || message.reference.messageId != questionMessageID)
+		if (
+			message.reference == null ||
+			message.reference.messageId != questionMessageID
+		)
 			return;
 
 		if (message.author.id == questionUserID)
 			return message.reply(`你回答自己的問題幹嘛....`);
 
-		if (answers.includes(message.content)) return message.react("❌");
+		if (!answers.includes(message.content)) return message.react("❌");
 
 		message.react("<:icon_checkmark:1173699014538039417>");
 		await message.reply(`Wooo! 你答對了! 正在發放獎勵...`);
@@ -521,13 +523,13 @@ client.on("messageCreate", async (message) => {
 			);
 		const user = await getUser(message.author.id);
 		if (user.error)
-			returnmessage.reply(`真是可惜，你沒有註冊...只好把獎勵充公ㄌowo`);
+			return message.reply(`真是可惜，你沒有註冊...只好把獎勵充公ㄌowo`);
 
 		await setUserCoins(message.author.id, user.info.coins + questionAmount);
-		await message.reply(
+		questionMessageID = 0;
+		return message.reply(
 			`你已成功獲得 ${questionAmount} <:freecoin:1171871969617117224>`
 		);
-		return (questionMessageID = 0);
 	}
 
 	// user join event
