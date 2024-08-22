@@ -336,9 +336,10 @@ cron.schedule("0 0 * * *", async () => {
 	console.log("Clearing signs...");
 	clearSignsFromDB();
 	deleteOutdatedBoosters();
-	return fetch(
-		"https://uptime.freeserver.tw/api/push/Vo52SSQ5YM?status=up&msg=OK&ping="
-	);
+});
+
+cron.schedule("* * * * *", async () => {
+	fetch("https://uptime.freeserver.tw/api/push/Vo52SSQ5YM?status=up&msg=OK&ping=")
 });
 
 async function getUser(id) {
