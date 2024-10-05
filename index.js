@@ -342,6 +342,30 @@ cron.schedule("* * * * *", async () => {
 	fetch("https://uptime.freeserver.tw/api/push/Vo52SSQ5YM?status=up&msg=OK&ping=")
 });
 
+async function getAD() {
+	fetch('https://cdn.freeserver.tw/ad/list.json')
+		.then(response => response.text())
+		.then(text => {
+			try {
+			const json = JSON.parse(text);
+			if (Array.isArray(json)) {
+				const randomAd = json[Math.floor(Math.random() * json.length)];
+				return randomAd;
+			} else if (json.list && Array.isArray(json.list)) {
+				if (json.disabled) {
+				} else {
+				const randomAd = json.list[Math.floor(Math.random() * json.list.length)];
+				return randomAd;
+				}
+			} else {
+				console.error('Unexpected JSON structure:', json);
+			}
+			} catch (error) {
+			console.error('Error parsing JSON:', error);
+			}
+		})
+}
+
 async function getUser(id) {
 	await dclog("DB", `Getting user data via api \`${id}\``);
 	const url = `${process.env.DASH_URL}/api/admin/user/getFromID`;
@@ -842,8 +866,13 @@ client.on("interactionCreate", async (interaction) => {
 		}
 		await signIntoDB(interaction.user.id);
 
+		let ad;
+		if (Math.random() < 0.3) {
+			ad = await getAD();
+		}
+
 		await interaction.followUp({
-			content: `已成功簽到! 你獲得了 ${amount} <:freecoin:1171871969617117224> ${multiplier > 1 ? `(${random}+${amount - random}加成)` : ""}! ${inviter ? `你的邀請者 <@${inviter}> 獲得了 1 <:freecoin:1171871969617117224>!` : ""}`,
+			content: `已成功簽到! 你獲得了 ${amount} <:freecoin:1171871969617117224> ${multiplier > 1 ? `(${random}+${amount - random}加成)` : ""}! ${inviter ? `你的邀請者 <@${inviter}> 獲得了 1 <:freecoin:1171871969617117224>!` : ""}${ad ? `\n-# 由 **${ad.name}** 提供的贊助商廣告: [**${ad.text}**](<${ad.url}>)     [_[贊助說明]_](<https://freeserver.tw/donate>)` : ""}`,
 			allowedMentions: { parse: [] },
 		});
 
