@@ -343,27 +343,23 @@ cron.schedule("* * * * *", async () => {
 });
 
 async function getAD() {
-	fetch('https://cdn.freeserver.tw/ad/list.json')
-		.then(response => response.text())
-		.then(text => {
-			try {
-			const json = JSON.parse(text);
-			if (Array.isArray(json)) {
-				const randomAd = json[Math.floor(Math.random() * json.length)];
-				return randomAd;
-			} else if (json.list && Array.isArray(json.list)) {
-				if (json.disabled) {
-				} else {
-				const randomAd = json.list[Math.floor(Math.random() * json.list.length)];
-				return randomAd;
-				}
-			} else {
-				console.error('Unexpected JSON structure:', json);
-			}
-			} catch (error) {
-			console.error('Error parsing JSON:', error);
-			}
-		})
+	try {
+		const response = await fetch('https://cdn.freeserver.tw/ad/list.json');
+		if (!response.ok) {
+		throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		const adList = await response.json();
+		
+		if (adList.length === 0) {
+		throw new Error('Ad list is empty');
+		}
+		
+		const randomIndex = Math.floor(Math.random() * adList.length);
+		return adList[randomIndex];
+	} catch (error) {
+		console.error('Error fetching or processing ad list:', error);
+		return null;
+	}
 }
 
 async function getUser(id) {
